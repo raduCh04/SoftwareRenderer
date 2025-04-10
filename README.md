@@ -10,7 +10,7 @@ A basic software rasterizer written in C that renders simple 2D graphics and exp
    - [ ] Different Thickness
    - [ ] Antialiasing (Xiaolin Wu)
 - Circle drawing  
-   - [ ] Mathematical Equation
+   - [x] Mathematical Equations
    - [ ] Bresenham Approach
 - Polygon filling  
    - [ ] Scan Line
