@@ -14,7 +14,7 @@ typedef enum Color
     WHITE = 0xFFFFFFFF,
     RED = 0xFF0000FF,
     GREEN = 0xFF00FF00,
-    BLUE = 0xFFFF0000,
+    BLUE =  0xFFFF0000,
 } Color;
 
 enum CONST
@@ -95,7 +95,32 @@ static void draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32
 
 static void draw_line_dda(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t color)
 {
-    // TODO: Implement
+    if (x0 == x1 && y0 == y1)
+    {
+        draw_point(x0, y0, color);
+        return;
+    }
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+
+    int steps = 0;
+    if (abs(dx) > abs(dy))
+        steps = abs(dx);
+    else
+        steps = abs(dy);
+    
+    float x_inc = dx / (float)steps;
+    float y_inc = dy / (float)steps;
+
+    float x = (float)x0;
+    float y = (float)y0;
+
+    for (int i = 0; i < steps; i++)
+    {
+        draw_point(roundf(x), roundf(y), color);
+        x += x_inc;
+        y += y_inc;
+    }
 }
 
 static void draw_line_bresenham(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t color)
@@ -199,6 +224,7 @@ static void pixmap_export()
 int main(void)
 {
     pixmap_clear(BLACK);
+    draw_line_dda(100, 100, 200, 120, WHITE);
     pixmap_export();
     return 0;
 }

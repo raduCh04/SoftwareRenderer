@@ -19,7 +19,7 @@ The primary objectives of this project are to:
 
 - [Line drawing](docs/line-drawing.md) 
    - [x] Mathematical Equation
-   - [ ] DDA Algorithm
+   - [x] DDA Algorithm
    - [ ] Bresenham Algorithm
    - [ ] Different Thickness
    - [ ] Antialiasing (Xiaolin Wu)

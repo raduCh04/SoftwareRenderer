@@ -13,9 +13,9 @@ y = mx + b
 $$
 
 Where:
-- \( y \) is the y-coordinate of any point on the line.
-- \( x \) is the x-coordinate of the point.
-- \( m \) is the **slope** of the line, defined as:
+- $y$ is the y-coordinate of any point on the line.
+- $x$ is the x-coordinate of the point.
+- $m$ is the **slope** of the line, defined as:
 
 $$
 m = \frac{y_1 - y_0}{x_1 - x_0}
