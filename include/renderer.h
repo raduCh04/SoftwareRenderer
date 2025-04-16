@@ -6,6 +6,8 @@
  * 
  */
 
+ #include <stdint.h>
+
 typedef enum Color
 {
     BLACK = 0xFF000000,
@@ -64,8 +66,6 @@ void draw_circle(uint32_t cx, uint32_t cy, float r, uint32_t color);
 void draw_circle_pyth(uint32_t cx, uint32_t cy, float r, uint32_t color);
 
 void draw_circle_bresenham(uint32_t cx, uint32_t cy, float r, uint32_t color);
-
-void draw_polygon(const Point *points, size_t n, uint32_t color);
 
 void pixmap_export();
 

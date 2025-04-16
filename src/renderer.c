@@ -7,6 +7,7 @@
  */
 
 #include <renderer.h>
+#include <rmath.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -108,6 +109,7 @@ void draw_line_dda(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t 
 void draw_line_bresenham(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t color)
 {
     // TODO: Implement
+    
 }
 
 void draw_circle_naive(uint32_t cx, uint32_t cy, float r, uint32_t color)

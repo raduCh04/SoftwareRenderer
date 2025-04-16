@@ -42,11 +42,15 @@ More coming soon
 ## Usage  
 ### ✅ Prerequisites
 - A C compiler (e.g., `gcc` , `clang`, `MSVC`)
+- CMake
 - GIMP, ImageMagick, or any image viewer that supports loading raw `.data`
 
 ### Build & Run
 ```bash
-gcc main.c -o renderer -lm
+mkdir build
+cd build
+cmake ../
+make
 ./renderer
 ```
 This will generate a file called pixmap.data in the current directory.
