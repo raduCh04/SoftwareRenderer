@@ -3,7 +3,7 @@
  * @author Radu-Dumitru Chira (you@domain.com)
  * @version 0.1
  * @date 2025-04-12
- * 
+ *
  */
 
 #include <renderer.h>
@@ -14,21 +14,58 @@
 #include <stdint.h>
 #include <stddef.h>
 
-static uint32_t pixmap[RES];
+static int32_t pixmap[RES];
 
-void pixmap_clear(uint32_t color)
+static void swapi(int32_t *a, int32_t *b)
 {
-    for (int i = 0; i < RES; i++)
-    {
-        pixmap[i] = color;
-    }
+    int32_t temp = *a;
+    *a = *b;
+    *b = temp;
 }
 
-void draw_point(uint32_t x, uint32_t y, uint32_t color)
+void pixmap_clear(int32_t color)
+{
+    for (int32_t i = 0; i < RES; i++)
+        pixmap[i] = color;
+}
+
+void draw_point(int32_t x, int32_t y, int32_t color)
 {
     if (x >= WIDTH || y >= HEIGHT)
         return;
     pixmap[y * WIDTH + x] = color;
+}
+
+static void draw_vertical_line(int32_t x, int32_t y0, int32_t y1, int32_t color)
+{
+    if (y0 == y1)
+    {
+        draw_point(x, y0, color);
+        return;
+    }
+
+    if (y0 > y1)
+        swap(&y0, &y1);
+
+    for (int32_t y = y0; y < y1; y++)
+    {
+        draw_point(x, y, color);
+    }
+}
+
+static void draw_horizontal_line(int32_t x0, int32_t x1, int32_t y, int32_t color)
+{
+    if (x0 == x1)
+    {
+        draw_point(x0, y, color);
+        return;
+    }
+
+    if (x1 > x0)
+        swap(&x0, &x1);
+
+    for (int32_t x = x0; x < x1; x++)
+        draw_point(x, y, color);
 }
 
 /*
@@ -38,7 +75,7 @@ void draw_point(uint32_t x, uint32_t y, uint32_t color)
  * It performs best when |slope| < 1. For steeper slopes or more consistent
  * performance across all directions, consider using the Digital Differential Analyzer (DDA) algorithm.
  */
-void draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t color)
+void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color)
 {
     if (x0 == x1 && y0 == y1)
     {
@@ -46,24 +83,22 @@ void draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t colo
         return;
     }
 
-    // Vertical lines
     if (x0 == x1)
     {
-        if (y0 > y1)
-        {
-            uint32_t temp = y0;
-            y0 = y1;
-            y1 = temp;
-        }
-        for (int y = y0; y <= y1; y++)
-            draw_point(x0, y, color);
+        draw_vertical_line(x0, y0, y1, color);
+        return;
+    }
+
+    if (y0 == y1)
+    {
+        draw_horizontal_line(x0, x1, y0, color);
         return;
     }
 
     // General case
     if (x0 > x1)
     {
-        uint32_t temp = x0;
+        int32_t temp = x0;
         x0 = x1;
         x1 = temp;
     }
@@ -76,13 +111,26 @@ void draw_line(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t colo
     }
 }
 
-void draw_line_dda(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t color)
+void draw_line_dda(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color)
 {
     if (x0 == x1 && y0 == y1)
     {
         draw_point(x0, y0, color);
         return;
     }
+
+    if (x0 == x1)
+    {
+        draw_vertical_line(x0, y0, y1, color);
+        return;
+    }
+
+    if (y0 == y1)
+    {
+        draw_horizontal_line(x0, x1, y0, color);
+        return;
+    }
+
     int dx = x1 - x0;
     int dy = y1 - y0;
 
@@ -91,7 +139,7 @@ void draw_line_dda(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t 
         steps = abs(dx);
     else
         steps = abs(dy);
-    
+
     float x_inc = dx / (float)steps;
     float y_inc = dy / (float)steps;
 
@@ -106,13 +154,60 @@ void draw_line_dda(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t 
     }
 }
 
-void draw_line_bresenham(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint32_t color)
+void draw_line_bresenham(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color)
 {
-    // TODO: Implement
-    
+    if (x0 == x1 && y0 == y1)
+    {
+        draw_point(x0, y0, color);
+        return;
+    }
+
+    if (x0 == x1)
+    {
+        draw_vertical_line(x0, y0, y1, color);
+        return;
+    }
+
+    if (y0 == y1)
+    {
+        draw_horizontal_line(x0, x1, y0, color);
+        return;
+    }
+
+    if (x0 > x1)
+    {
+        int32_t temp = x0;
+        x0 = x1;
+        x1 = temp;
+
+        temp = y0;
+        y0 = y1;
+        y1 = temp;
+    }
+
+    int32_t dx = x1 - x0;
+    int32_t dy = y1 - y0;
+
+    int32_t D = 2 * dy - dx;
+    int32_t x = x0;
+    int32_t y = y0;
+    draw_point(x, y, color);
+
+    while (x < x1)
+    {
+        x++;
+        if (D < 0)
+            D += 2 * dy;
+        else
+        {
+            y++;
+            D += 2 * (dy - dx);
+        }
+        draw_point(x, y, color);
+    }
 }
 
-void draw_circle_naive(uint32_t cx, uint32_t cy, float r, uint32_t color)
+void draw_circle_naive(int32_t cx, int32_t cy, float r, int32_t color)
 {
     for (float t = 0; t < 2 * M_PI; t += 0.01f)
     {
@@ -134,7 +229,7 @@ void draw_circle_naive(uint32_t cx, uint32_t cy, float r, uint32_t color)
  * Performance and precision can be significantly improved by using a
  * precomputed lookup table for sine and cosine values.
  */
-void draw_circle(uint32_t cx, uint32_t cy, float r, uint32_t color)
+void draw_circle(int32_t cx, int32_t cy, float r, int32_t color)
 {
     for (float t = (M_PI / 2); t > (M_PI / 4); t -= 0.01f)
     {
@@ -158,7 +253,7 @@ void draw_circle(uint32_t cx, uint32_t cy, float r, uint32_t color)
  * While conceptually straightforward, this method is not optimal due to the
  * computational cost of square root operations and rounding.
  */
-void draw_circle_pyth(uint32_t cx, uint32_t cy, float r, uint32_t color)
+void draw_circle_pyth(int32_t cx, int32_t cy, float r, int32_t color)
 {
     int x = 0;
     int y = (int)r;
@@ -178,12 +273,12 @@ void draw_circle_pyth(uint32_t cx, uint32_t cy, float r, uint32_t color)
     }
 }
 
-void draw_circle_bresenham(uint32_t cx, uint32_t cy, float r, uint32_t color)
+void draw_circle_bresenham(int32_t cx, int32_t cy, float r, int32_t color)
 {
     // TODO: Implement
 }
 
-void draw_polygon(const Point *points, size_t n, uint32_t color)
+void draw_polygon(const Point *points, size_t n, int32_t color)
 {
     if (n < 2)
         return;
@@ -200,7 +295,7 @@ void pixmap_export()
     FILE *data = fopen("pixmap.data", "w");
     if (data != NULL)
     {
-        fwrite(pixmap, sizeof(uint32_t), RES, data);
+        fwrite(pixmap, sizeof(int32_t), RES, data);
     }
     fclose(data);
 }

@@ -20,7 +20,7 @@ The primary objectives of this project are to:
 - [Line drawing](docs/line-drawing.md) 
    - [x] Mathematical Equation
    - [x] DDA Algorithm
-   - [ ] Bresenham Algorithm
+   - [x] Bresenham Algorithm
    - [ ] Different Thickness
    - [ ] Antialiasing (Xiaolin Wu)
 - [Circle drawing](docs/circle-drawing.md)
