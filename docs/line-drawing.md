@@ -68,7 +68,7 @@ The **Digital Differential Analyzer** is a line drawing algorithm based on the i
 $$
 x_{\text{step}}= \frac{dx}{steps} \quad y_{\text{step}} = \frac{dy}{steps}
 $$
-4. Starting from the initial point $(x0,y0)$, add $x_{\text{step}}$​ and $y_{\text{step}}$ at each iteration and plot the point until the final point $(x1,y1)$ is reached.
+4. Starting from the initial point $(x_0,y_0)$, add $x_{\text{step}}$​ and $y_{\text{step}}$ at each iteration and plot the point until the final point $(x_1,y_1)$ is reached.
 
 #### Performance Considerations
 

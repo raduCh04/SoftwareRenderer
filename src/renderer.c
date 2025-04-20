@@ -3,7 +3,6 @@
  * @author Radu-Dumitru Chira (you@domain.com)
  * @version 0.1
  * @date 2025-04-12
- *
  */
 
 #include <renderer.h>
@@ -13,9 +12,20 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
-static int32_t pixmap[RES];
+/**
+ * @brief Emulates a display
+ * 
+ */
+static int32_t pixmap[RES]; 
 
+/**
+ * @brief Swaps two integers
+ * 
+ * @param a Pointer to integer a
+ * @param b Pointer to integer b
+ */
 static void swapi(int32_t *a, int32_t *b)
 {
     int32_t temp = *a;
@@ -36,6 +46,17 @@ void draw_point(int32_t x, int32_t y, int32_t color)
     pixmap[y * WIDTH + x] = color;
 }
 
+/**
+ * @brief Draws a vertical line at a specified x-coordinate between two y-coordinates
+ * 
+ * This function draws a vertical line segment by plotting individual points
+ * from y0 to y1 (exclusive). If y0 > y1, they are swapped to maintain drawing order.
+ * 
+ * @param x x-axis coordinate where the vertical line is drawn
+ * @param y0 starting y-coordinate
+ * @param y1 ending y-coordinate
+ * @param color 4 byte integer which represents a color (ARGB)
+ */
 static void draw_vertical_line(int32_t x, int32_t y0, int32_t y1, int32_t color)
 {
     if (y0 == y1)
@@ -45,7 +66,7 @@ static void draw_vertical_line(int32_t x, int32_t y0, int32_t y1, int32_t color)
     }
 
     if (y0 > y1)
-        swap(&y0, &y1);
+        swapi(&y0, &y1);
 
     for (int32_t y = y0; y < y1; y++)
     {
@@ -53,6 +74,17 @@ static void draw_vertical_line(int32_t x, int32_t y0, int32_t y1, int32_t color)
     }
 }
 
+/**
+ * @brief Draws a horizontal line at a specified y-coordinate between two x-coordinates
+ * 
+ * This function draws a horizontal line segment by plotting individual points
+ * from x0 to x1 (exclusive). If x1 > x0, they are swapped to maintain drawing order.
+ * 
+ * @param x0 starting x-coordinate
+ * @param x1 ending x-coordinate
+ * @param y y-axis coordinate where the horizontal line is drawn
+ * @param color 4 byte integer which represents a color (ARGB)
+ */
 static void draw_horizontal_line(int32_t x0, int32_t x1, int32_t y, int32_t color)
 {
     if (x0 == x1)
@@ -62,19 +94,12 @@ static void draw_horizontal_line(int32_t x0, int32_t x1, int32_t y, int32_t colo
     }
 
     if (x1 > x0)
-        swap(&x0, &x1);
+        swapi(&x0, &x1);
 
     for (int32_t x = x0; x < x1; x++)
         draw_point(x, y, color);
 }
 
-/*
- * NOTE: This approach is not performance-optimal due to the frequent use of
- * floating-point arithmetic and rounding operations.
- *
- * It performs best when |slope| < 1. For steeper slopes or more consistent
- * performance across all directions, consider using the Digital Differential Analyzer (DDA) algorithm.
- */
 void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color)
 {
     if (x0 == x1 && y0 == y1)
@@ -154,6 +179,7 @@ void draw_line_dda(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color
     }
 }
 
+//TODO: Handle other slopes (m < 0, m > 0)
 void draw_line_bresenham(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color)
 {
     if (x0 == x1 && y0 == y1)
@@ -187,21 +213,23 @@ void draw_line_bresenham(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t
 
     int32_t dx = x1 - x0;
     int32_t dy = y1 - y0;
-
     int32_t D = 2 * dy - dx;
+    int32_t incrEast = 2 * dy;
+    int32_t incrNEast = 2 * (dy - dx);
     int32_t x = x0;
     int32_t y = y0;
+
     draw_point(x, y, color);
 
     while (x < x1)
     {
         x++;
         if (D < 0)
-            D += 2 * dy;
+            D += incrEast;
         else
         {
             y++;
-            D += 2 * (dy - dx);
+            D += incrNEast;
         }
         draw_point(x, y, color);
     }
@@ -217,18 +245,6 @@ void draw_circle_naive(int32_t cx, int32_t cy, float r, int32_t color)
     }
 }
 
-/*
- * NOTE: This implementation is based on the parametric equation
- * (x(t), y(t)) = (r * cos(t), r * sin(t)), where t ∈ [π/4, π/2],
- * representing 1/8 of a circle.
- *
- * This approach is inefficient due to the high number of trigonometric
- * function calls (sin, cos), floating-point arithmetic, and rounding operations.
- * Additionally, accuracy is limited by the choice of the time step (e.g., Δt = 0.01).
- *
- * Performance and precision can be significantly improved by using a
- * precomputed lookup table for sine and cosine values.
- */
 void draw_circle(int32_t cx, int32_t cy, float r, int32_t color)
 {
     for (float t = (M_PI / 2); t > (M_PI / 4); t -= 0.01f)
@@ -246,13 +262,6 @@ void draw_circle(int32_t cx, int32_t cy, float r, int32_t color)
     }
 }
 
-/*
- * NOTE: This implementation is derived from the implicit equation of a circle:
- * r² = x² + y², rearranged as y = sqrt(r² - x²), where x ∈ [−r, r].
- *
- * While conceptually straightforward, this method is not optimal due to the
- * computational cost of square root operations and rounding.
- */
 void draw_circle_pyth(int32_t cx, int32_t cy, float r, int32_t color)
 {
     int x = 0;
@@ -290,7 +299,7 @@ void draw_polygon(const Point *points, size_t n, int32_t color)
     draw_line(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, color);
 }
 
-void pixmap_export()
+void pixmap_export(void)
 {
     FILE *data = fopen("pixmap.data", "w");
     if (data != NULL)
