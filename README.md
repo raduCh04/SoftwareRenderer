@@ -25,7 +25,7 @@ The primary objectives of this project are to:
    - [ ] Antialiasing (Xiaolin Wu)
 - [Circle drawing](docs/circle-drawing.md)
    - [x] Mathematical Equations
-   - [ ] Bresenham Approach
+   - [x] Bresenham Approach
 - [Polygon drawing & filling](docs/polygon-drawing-filling.md)
    - [ ] Connecting Vertices
    - [ ] Scan Line

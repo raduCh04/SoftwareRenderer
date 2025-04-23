@@ -131,6 +131,10 @@ void draw_circle_naive(int32_t cx, int32_t cy, float r, int32_t color);
  * 
  * @note Still relies on trigonometric functions and float rounding.
  * 
+ * @note
+ * The function expects the radius as a float for consistency with other functions,
+ * but internally it is cast to integer for optimized computation.
+ * 
  * @param cx x-coordinate of the center
  * @param cy y-coordinate of the center
  * @param r Radius of the circle
@@ -146,6 +150,10 @@ void draw_circle(int32_t cx, int32_t cy, float r, int32_t color);
  * 
  * @note Slower due to frequent square root operations and rounding.
  * 
+ * @note
+ * The function expects the radius as a float for consistency with other functions,
+ * but internally it is cast to integer for optimized computation.
+ * 
  * @param cx x-coordinate of the center
  * @param cy y-coordinate of the center
  * @param r Radius of the circle
@@ -154,12 +162,26 @@ void draw_circle(int32_t cx, int32_t cy, float r, int32_t color);
 void draw_circle_pyth(int32_t cx, int32_t cy, float r, int32_t color);
 
 /**
- * @brief Draws a circle using Bresenham's algorithm for rasterizing circles efficiently
+ * @brief Draws a circle using Bresenham's midpoint circle algorithm.
  * 
- * @param cx x-coordinate of the center
- * @param cy y-coordinate of the center
- * @param r radius of the circle (as float)
- * @param color 4 byte integer which represent a color (ARGB)
+ * This method is an efficient, integer-only implementation of circle drawing. It avoids
+ * floating-point operations and trigonometric calculations by using a decision parameter
+ * (D) to determine the next pixel to draw while traversing the circle's octants.
+ * 
+ * It exploits the symmetry of circles by calculating one-eighth of the circle and
+ * mirroring the results into the other seven octants using horizontal and vertical reflection.
+ * 
+ * Performance-wise, this algorithm is significantly faster than naive trigonometric
+ * or parametric approaches, making it ideal for low-level pixel manipulation.
+ * 
+ * @param cx x-coordinate of the circle center
+ * @param cy Y-coordinate of the circle center
+ * @param r Radius of the circle
+ * @param color 4 byte integer representing the color in ARGB format
+ * 
+ * @note
+ * The function expects the radius as a float for consistency with other functions,
+ * but internally it is cast to integer for optimized computation.
  */
 void draw_circle_bresenham(int32_t cx, int32_t cy, float r, int32_t color);
 

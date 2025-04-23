@@ -266,6 +266,7 @@ void draw_circle_pyth(int32_t cx, int32_t cy, float r, int32_t color)
 {
     int x = 0;
     int y = (int)r;
+
     while (y >= x)
     {
         draw_point(cx + x, cy + y, color);
@@ -284,7 +285,35 @@ void draw_circle_pyth(int32_t cx, int32_t cy, float r, int32_t color)
 
 void draw_circle_bresenham(int32_t cx, int32_t cy, float r, int32_t color)
 {
-    // TODO: Implement
+    int r2 = r + r;
+    int x = r;
+    int y = 0;
+    int dy = -2;
+    int dx = r2 + r2 - 4;
+    int D = r2 - 1;
+
+    while (y <= x)
+    {
+        draw_point(cx + x, cy + y, color);
+        draw_point(cx - x, cy + y, color);
+        draw_point(cx + x, cy - y, color);
+        draw_point(cx - x, cy - y, color);
+        draw_point(cx + y, cy + x, color);
+        draw_point(cx - y, cy + x, color);
+        draw_point(cx + y, cy - x, color);
+        draw_point(cx - y, cy - x, color);
+
+        D += dy;
+        dy -= 4;
+        y++;
+
+        if (D < 0)
+        {
+            D += dx;
+            dx -= 4;
+            x--;
+        }
+    }
 }
 
 void draw_polygon(const Point *points, size_t n, int32_t color)

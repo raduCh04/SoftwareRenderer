@@ -3,6 +3,6 @@
 int main(void)
 {
     pixmap_clear(BLACK);
-    draw_line_bresenham(100, 100, 200, 50, WHITE);
+    draw_circle_bresenham(50, 50, 50, WHITE);
     pixmap_export();
 }
