@@ -45,7 +45,7 @@ Where:
 ##### Performance Consideration:
 This method is computationally expensive because of frequent **floating-point operations** (sine and cosine calculations) and **rounding**. It is not optimal for real-time applications.
 
-### 2. **Optimized Equation Method**
+#### 1.1 **Optimized Equation Method**
 This approach uses the same equation as the **Mathematical Equation Method**, however it is based on the symmetry of a circle, since a circle can be divided in **eight equal octants** with the same **45°** angle. This means we can mirror the coordinates of one octant, to create a full circle. For a given point ($x, y$), the following points are also on the circle:
 $$
 (h + x, k + y),(h - x, k + y),(h + x, k - y),(h -x, k - y) \\
@@ -67,3 +67,11 @@ Where:
 3. Round the calculated coordinates to the nearest integer values.
 4. Mirror the calculated coordinates to the other seven points on the circle.
 4. Plot the points $ (x(t), y(t)) $ for all evaluated coordinates for the range $\frac{2}{\pi}$ to $\frac{4}{\pi}$.
+
+### 2. **Midpoint Circle Drawing Algorithm**
+Comming Soon
+
+### 3. **Bresenham Circle Drawing Algorithm**
+Comming Soon
+
+### 4. **Circle Filling Algorithm**

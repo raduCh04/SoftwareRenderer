@@ -6,7 +6,7 @@
  * 
  * @brief Core 2D rendering routines including line, circle, and polygon drawing.
  * 
- * @note Colors are stored in ARGB format (Alpha, Red, Green, Blue), rather than RGBA.
+ * @note Colors are stored in RGBA format (Alpha, Red, Green, Blue), rather than RGBA.
  * 
  * Each pixel in the `pixmap` is a 32-bit signed integer, where:
  *   - Bits 24–31: Alpha
@@ -23,11 +23,11 @@
   */
 typedef enum Color
 {
-    BLACK = 0xFF000000,
+    BLACK = 0x000000FF,
     WHITE = 0xFFFFFFFF,
     RED = 0xFF0000FF,
-    GREEN = 0xFF00FF00,
-    BLUE =  0xFFFF0000,
+    GREEN = 0x00FF00FF,
+    BLUE =  0x0000,
 } Color;
 
 /**
@@ -47,9 +47,17 @@ enum CONST
  * 
  * Fills the entire pixmap with the given color value.
  * 
- * @param color 4 byte integer representing the color in ARGB format
+ * @param color 4 byte integer representing the color in RGBA format
  */
-void pixmap_clear(int32_t color);
+void pixmap_clear(uint32_t color);
+
+/**
+ * @brief Exports the current state of the pixmap to a file
+ * 
+ * Saves the `pixmap` array to a file named "pixmap.data" in binary format.
+ * This can be used to visualize the frame buffer or debug the rendering output.
+ */
+void pixmap_export(void);
 
 /**
  * @brief Draws a single pixel on the display
@@ -58,9 +66,12 @@ void pixmap_clear(int32_t color);
  * 
  * @param x x-coordinate of the pixel
  * @param y y-coordinate of the pixel
- * @param color 4 byte integer representing the color in ARGB format
+ * @param color 4 byte integer representing the color in RGBA format
  */
-void draw_point(int32_t x, int32_t y, int32_t color);
+void draw_point(int32_t x, int32_t y, uint32_t color);
+
+//TODO: Add description
+void draw_point_thick(int32_t x, int32_t y, int32_t thickness, uint32_t color);
 
 /**
  * @brief Draws a straight line using the slope-intercept method (y = mx + b)
@@ -74,9 +85,23 @@ void draw_point(int32_t x, int32_t y, int32_t color);
  * @param y0 Starting y-coordinate
  * @param x1 Ending x-coordinate
  * @param y1 Ending y-coordinate
- * @param color 4 byte integer representing the color in ARGB format
+ * @param color 4 byte integer representing the color in RGBA format
  */
-void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color);
+void draw_line_equation(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color);
+
+/**
+ * @brief Draws a straight line using the incremental (floating-point) method.
+ * 
+ * Uses the slope `m` to incrementally compute y from x in floating point.
+ * Suitable for all slopes but slower than integer-based methods.
+ * 
+ * @param x0 Starting x-coordinate.
+ * @param y0 Starting y-coordinate.
+ * @param x1 Ending x-coordinate.
+ * @param y1 Ending y-coordinate.
+ * @param color 4-byte integer representing the color in RGBA format.
+ */
+void draw_line_incremental(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color);
 
 /**
  * @brief Draws a line using the Digital Differential Analyzer (DDA) algorithm
@@ -88,9 +113,38 @@ void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color);
  * @param y0 Starting y-coordinate
  * @param x1 Ending x-coordinate
  * @param y1 Ending y-coordinate
- * @param color 4 byte integer representing the color in ARGB format
+ * @param color 4 byte integer representing the color in RGBA format
  */
-void draw_line_dda(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color);
+void draw_line_dda(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color);
+
+/**
+ * @brief Draws a straight line using a floating-point decision method.
+ * 
+ * This function draws a line between two points (x0, y0) and (x1, y1)
+ * using a floating-point approximation of the line equation y = mx + b.
+ * 
+ * Instead of directly rounding the y-value (as in DDA), it introduces a decision
+ * mechanism: for each x, the actual floating-point y position (py) is calculated,
+ * and it decides whether to increment the integer y-coordinate based on whether
+ * py is closer to y or y + 1.
+ * 
+ * This is a pedagogical step toward Bresenham's algorithm: it avoids rounding 
+ * and starts thinking in terms of error and decision, though it still uses 
+ * floating-point math.
+ * 
+ * Horizontal, vertical, and diagonal lines are handled by a separate helper
+ * (`handle_basic_lines`) for optimization and clarity.
+ * 
+ * @note This method is slower than integer-only methods, but is useful for
+ * understanding how decision-based line drawing works.
+ * 
+ * @param x0 Starting x-coordinate.
+ * @param y0 Starting y-coordinate.
+ * @param x1 Ending x-coordinate.
+ * @param y1 Ending y-coordinate.
+ * @param color 4-byte integer representing the color in RGBA format.
+ */
+void draw_line_midpoint(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color);
 
 /**
  * @brief Draws a line using Bresenham’s line drawing algorithm
@@ -104,9 +158,9 @@ void draw_line_dda(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color
  * @param y0 Starting y-coordinate
  * @param x1 Ending x-coordinate
  * @param y1 Ending y-coordinate
- * @param color 4 byte integer representing the color in ARGB format
+ * @param color 4 byte integer representing the color in RGBA format
  */
-void draw_line_bresenham(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color);
+void draw_line_bresenham(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color);
 
 /**
  * @brief Draws a circle using the naive parametric equation method
@@ -119,9 +173,9 @@ void draw_line_bresenham(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t
  * @param cx x-coordinate of the center
  * @param cy y-coordinate of the center
  * @param r Radius of the circle
- * @param color 4 byte integer representing the color in ARGB format
+ * @param color 4 byte integer representing the color in RGBA format
  */
-void draw_circle_naive(int32_t cx, int32_t cy, float r, int32_t color);
+void draw_circle_equation1(int32_t cx, int32_t cy, int32_t r, uint32_t color);
 
 /**
  * @brief Draws a full circle by symmetry from 1/8th parametric arc
@@ -138,9 +192,9 @@ void draw_circle_naive(int32_t cx, int32_t cy, float r, int32_t color);
  * @param cx x-coordinate of the center
  * @param cy y-coordinate of the center
  * @param r Radius of the circle
- * @param color 4 byte integer representing the color in ARGB format
+ * @param color 4 byte integer representing the color in RGBA format
  */
-void draw_circle(int32_t cx, int32_t cy, float r, int32_t color);
+void draw_circle_equation2(int32_t cx, int32_t cy, int32_t r, uint32_t color);
 
 /**
  * @brief Draws a circle using the Pythagorean theorem (x² + y² = r²)
@@ -157,9 +211,12 @@ void draw_circle(int32_t cx, int32_t cy, float r, int32_t color);
  * @param cx x-coordinate of the center
  * @param cy y-coordinate of the center
  * @param r Radius of the circle
- * @param color 4 byte integer representing the color in ARGB format
+ * @param color 4 byte integer representing the color in RGBA format
  */
-void draw_circle_pyth(int32_t cx, int32_t cy, float r, int32_t color);
+void draw_circle_equation3(int32_t cx, int32_t cy, int32_t r, uint32_t color);
+
+//TODO: Add description
+void draw_circle_midpoint(int32_t cx, int32_t cy, int32_t r, uint32_t color);
 
 /**
  * @brief Draws a circle using Bresenham's midpoint circle algorithm.
@@ -177,20 +234,10 @@ void draw_circle_pyth(int32_t cx, int32_t cy, float r, int32_t color);
  * @param cx x-coordinate of the circle center
  * @param cy Y-coordinate of the circle center
  * @param r Radius of the circle
- * @param color 4 byte integer representing the color in ARGB format
+ * @param color 4 byte integer representing the color in RGBA format
  * 
  * @note
  * The function expects the radius as a float for consistency with other functions,
  * but internally it is cast to integer for optimized computation.
  */
-void draw_circle_bresenham(int32_t cx, int32_t cy, float r, int32_t color);
-
-/**
- * @brief Exports the current state of the pixmap to a file
- * 
- * Saves the `pixmap` array to a file named "pixmap.data" in binary format.
- * This can be used to visualize the frame buffer or debug the rendering output.
- */
-void pixmap_export();
-
-
+void draw_circle_bresenham(int32_t cx, int32_t cy, int32_t r, uint32_t color);

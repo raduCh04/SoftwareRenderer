@@ -18,7 +18,7 @@
  * @brief Emulates a display
  * 
  */
-static int32_t pixmap[RES]; 
+static uint32_t pixmap[RES]; 
 
 /**
  * @brief Swaps two integers
@@ -33,18 +33,30 @@ static void swapi(int32_t *a, int32_t *b)
     *b = temp;
 }
 
-void pixmap_clear(int32_t color)
+void pixmap_clear(uint32_t color)
 {
-    for (int32_t i = 0; i < RES; i++)
+    for (uint32_t i = 0; i < RES; i++)
         pixmap[i] = color;
 }
 
-void draw_point(int32_t x, int32_t y, int32_t color)
+void draw_point(int32_t x, int32_t y, uint32_t color)
 {
-    if (x >= WIDTH || y >= HEIGHT)
-        return;
+    // if (x >= WIDTH || y >= HEIGHT)
+    //     return;
     pixmap[y * WIDTH + x] = color;
 }
+
+void draw_point_thick(int32_t x, int32_t y, int32_t thickness, uint32_t color)
+{
+    int radius = thickness / 2;
+    for (int dx = -radius; dx <= radius; dx++)
+        for (int dy = -radius; dy <= radius; dy++)
+        {
+            draw_point(x + dx, y + dy, color);
+        }
+}
+
+/****************************************LINE FUNCTIONS*************************************************/
 
 /**
  * @brief Draws a vertical line at a specified x-coordinate between two y-coordinates
@@ -55,9 +67,9 @@ void draw_point(int32_t x, int32_t y, int32_t color)
  * @param x x-axis coordinate where the vertical line is drawn
  * @param y0 starting y-coordinate
  * @param y1 ending y-coordinate
- * @param color 4 byte integer which represents a color (ARGB)
+ * @param color 4 byte integer which represents a color (RGBA)
  */
-static void draw_vertical_line(int32_t x, int32_t y0, int32_t y1, int32_t color)
+static void draw_vertical_line(int32_t x, int32_t y0, int32_t y1, uint32_t color)
 {
     if (y0 == y1)
     {
@@ -83,9 +95,9 @@ static void draw_vertical_line(int32_t x, int32_t y0, int32_t y1, int32_t color)
  * @param x0 starting x-coordinate
  * @param x1 ending x-coordinate
  * @param y y-axis coordinate where the horizontal line is drawn
- * @param color 4 byte integer which represents a color (ARGB)
+ * @param color 4 byte integer which represents a color (RGBA)
  */
-static void draw_horizontal_line(int32_t x0, int32_t x1, int32_t y, int32_t color)
+static void draw_horizontal_line(int32_t x0, int32_t x1, int32_t y, uint32_t color)
 {
     if (x0 == x1)
     {
@@ -100,61 +112,91 @@ static void draw_horizontal_line(int32_t x0, int32_t x1, int32_t y, int32_t colo
         draw_point(x, y, color);
 }
 
-void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color)
+static bool handle_basic_lines(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color)
 {
     if (x0 == x1 && y0 == y1)
     {
         draw_point(x0, y0, color);
-        return;
+        return true;
     }
 
     if (x0 == x1)
     {
         draw_vertical_line(x0, y0, y1, color);
-        return;
+        return true;
     }
 
     if (y0 == y1)
     {
         draw_horizontal_line(x0, x1, y0, color);
-        return;
+        return true;
     }
 
-    // General case
-    if (x0 > x1)
+    return false;
+}
+
+void draw_line_equation(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color)
+{
+
+    if (handle_basic_lines(x0, y0, x1, y1, color))
+        return;
+
+    bool steep = abs(y1 - y0) > abs(x1 - x0);
+
+    if (steep) // Handle steep slope
     {
-        int32_t temp = x0;
-        x0 = x1;
-        x1 = temp;
+        swapi(&x0, &y0);
+        swapi(&x1, &y1);
     }
-    float m = (y1 - y0) / (float)(x1 - x0);
+
+    if (x0 > x1) // Draw from "left" to "right"
+    {
+        swapi(&x0, &x1);
+        swapi(&y0, &y1);
+    } 
+
+    float m = (float)(y1 - y0) / (x1 - x0);
     float b = y0 - m * x0;
-    for (int x = x0; x <= x1; x++)
+    for (int x = x0; x <= x1; x++) //TODO: Check if inclusive or exclusive
     {
         float y = m * x + b;
         draw_point(x, roundf(y), color);
     }
 }
 
-void draw_line_dda(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color)
+void draw_line_incremental(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color)
 {
-    if (x0 == x1 && y0 == y1)
-    {
-        draw_point(x0, y0, color);
+    if (handle_basic_lines(x0, y0, x1, y1, color))
         return;
+
+    bool steep = abs(y1 - y0) > abs(x1 - x0);
+
+    if (steep) // Handle steep slopes
+    {
+        swapi(&x0, &y0);
+        swapi(&x1, &y1);
     }
 
-    if (x0 == x1)
+    if (x0 > x1) // Draw from "left" to "right"
     {
-        draw_vertical_line(x0, y0, y1, color);
-        return;
-    }
+        swapi(&x0, &x1);
+        swapi(&y0, &y1);
+    } 
 
-    if (y0 == y1)
+    float m = (y1 - y0) / (float)(x1 - x0);
+    float b = y0 - m * x0;
+    float y = m * x0 + b;
+    for (int x = x0; x <= x1; x++) //TODO: Check if inclusive or exclusive
     {
-        draw_horizontal_line(x0, x1, y0, color);
-        return;
+        y += m;
+        draw_point(x, roundf(y), color);
     }
+}
+
+void draw_line_dda(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color)
+{
+    if (handle_basic_lines(x0, y0, x1, y1, color))
+        return;
 
     int dx = x1 - x0;
     int dy = y1 - y0;
@@ -179,36 +221,41 @@ void draw_line_dda(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color
     }
 }
 
-//TODO: Handle other slopes (m < 0, m > 0)
-void draw_line_bresenham(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t color)
+void draw_line_midpoint(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color)
 {
-    if (x0 == x1 && y0 == y1)
-    {
-        draw_point(x0, y0, color);
+    if (handle_basic_lines(x0, y0, x1, y1, color))
         return;
-    }
-
-    if (x0 == x1)
-    {
-        draw_vertical_line(x0, y0, y1, color);
-        return;
-    }
-
-    if (y0 == y1)
-    {
-        draw_horizontal_line(x0, x1, y0, color);
-        return;
-    }
 
     if (x0 > x1)
     {
-        int32_t temp = x0;
-        x0 = x1;
-        x1 = temp;
+        swapi(&x0, &x1);
+        swapi(&y0, &y1);
+    }
 
-        temp = y0;
-        y0 = y1;
-        y1 = temp;
+    float m = (float)(y1 - y0) / (x1 - x0);
+    float b = y0 - m * x0;
+    int32_t y = y0;
+
+    for (int32_t x = x0; x <= x1; x++)
+    {
+        float py = m * x + b;
+        if (py > y + 0.5f)
+            y++;
+
+        draw_point(x, y, color);
+    }
+}
+
+//TODO: Handle other slopes (m < 0, m > 0)
+void draw_line_bresenham(int32_t x0, int32_t y0, int32_t x1, int32_t y1, uint32_t color)
+{
+    if (handle_basic_lines(x0, y0, x1, y1, color))
+        return;
+
+    if (x0 > x1)
+    {
+        swapi(&x0, &x1);
+        swapi(&y0, &y1);
     }
 
     int32_t dx = x1 - x0;
@@ -235,7 +282,21 @@ void draw_line_bresenham(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t
     }
 }
 
-void draw_circle_naive(int32_t cx, int32_t cy, float r, int32_t color)
+/****************************************CIRCLE FUNCTIONS*************************************************/
+
+static void draw_circle_symmetric(int32_t cx, int32_t cy, int32_t x, int32_t y, uint32_t color)
+{
+    draw_point(cx + x, cy + y, color);
+    draw_point(cx - x, cy + y, color);
+    draw_point(cx + x, cy - y, color);
+    draw_point(cx - x, cy - y, color);
+    draw_point(cx + y, cy + x, color);
+    draw_point(cx - y, cy + x, color);
+    draw_point(cx + y, cy - x, color);
+    draw_point(cx - y, cy - x, color);
+}
+
+void draw_circle_equation1(int32_t cx, int32_t cy, int32_t r, uint32_t color) //TODO: Add t parameter?
 {
     for (float t = 0; t < 2 * M_PI; t += 0.01f)
     {
@@ -245,45 +306,35 @@ void draw_circle_naive(int32_t cx, int32_t cy, float r, int32_t color)
     }
 }
 
-void draw_circle(int32_t cx, int32_t cy, float r, int32_t color)
+void draw_circle_equation2(int32_t cx, int32_t cy, int32_t r, uint32_t color) //TODO: Add t parameter?
 {
     for (float t = (M_PI / 2); t > (M_PI / 4); t -= 0.01f)
     {
         int x = roundf(r * cosf(t));
         int y = roundf(r * sinf(t));
-        draw_point(cx + x, cy + y, color);
-        draw_point(cx - x, cy + y, color);
-        draw_point(cx + x, cy - y, color);
-        draw_point(cx - x, cy - y, color);
-        draw_point(cx + y, cy + x, color);
-        draw_point(cx - y, cy + x, color);
-        draw_point(cx + y, cy - x, color);
-        draw_point(cx - y, cy - x, color);
+        draw_circle_symmetric(cx, cy, x, y, color);
     }
 }
 
-void draw_circle_pyth(int32_t cx, int32_t cy, float r, int32_t color)
+void draw_circle_equation3(int32_t cx, int32_t cy, int32_t r, uint32_t color)
 {
     int x = 0;
-    int y = (int)r;
+    int y = r;
 
     while (y >= x)
     {
-        draw_point(cx + x, cy + y, color);
-        draw_point(cx - x, cy + y, color);
-        draw_point(cx + x, cy - y, color);
-        draw_point(cx - x, cy - y, color);
-        draw_point(cx + y, cy + x, color);
-        draw_point(cx - y, cy + x, color);
-        draw_point(cx + y, cy - x, color);
-        draw_point(cx - y, cy - x, color);
-
+        draw_circle_symmetric(cx, cy, x, y, color);
         x++;
         y = roundf(sqrtf(r * r - (float)x * x));
     }
 }
 
-void draw_circle_bresenham(int32_t cx, int32_t cy, float r, int32_t color)
+void draw_circle_midpoint(int32_t cx, int32_t cy, int32_t r, uint32_t color)
+{
+    //TODO: Implement
+}
+
+void draw_circle_bresenham(int32_t cx, int32_t cy, int32_t r, uint32_t color)
 {
     int r2 = r + r;
     int x = r;
@@ -294,14 +345,7 @@ void draw_circle_bresenham(int32_t cx, int32_t cy, float r, int32_t color)
 
     while (y <= x)
     {
-        draw_point(cx + x, cy + y, color);
-        draw_point(cx - x, cy + y, color);
-        draw_point(cx + x, cy - y, color);
-        draw_point(cx - x, cy - y, color);
-        draw_point(cx + y, cy + x, color);
-        draw_point(cx - y, cy + x, color);
-        draw_point(cx + y, cy - x, color);
-        draw_point(cx - y, cy - x, color);
+        draw_circle_symmetric(cx, cy, x, y, color);
 
         D += dy;
         dy -= 4;
@@ -316,24 +360,26 @@ void draw_circle_bresenham(int32_t cx, int32_t cy, float r, int32_t color)
     }
 }
 
-void draw_polygon(const Point *points, size_t n, int32_t color)
-{
-    if (n < 2)
-        return;
-    for (size_t i = 0; i < n - 1; i++)
-    {
-        draw_line(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, color);
-    }
-
-    draw_line(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, color);
-}
-
 void pixmap_export(void)
 {
-    FILE *data = fopen("pixmap.data", "w");
+    FILE *data = fopen("pixmap.ppm", "w");
     if (data != NULL)
     {
-        fwrite(pixmap, sizeof(int32_t), RES, data);
+        fprintf(data, "P3\n%d %d\n255\n", WIDTH, HEIGHT);
+        for (uint32_t i = 0; i < RES; i++)
+        {
+            uint32_t pixel = pixmap[i];
+
+            uint8_t r = (pixel >> 24) & 0xFF;
+            uint8_t g = (pixel >> 16) & 0xFF;
+            uint8_t b = (pixel >> 8)  & 0xFF;
+            uint8_t a = (pixel >> 0)  & 0xFF; //If needed in future
+
+            fprintf(data, "%d %d %d ", r, g, b);
+
+            if ((i + 1) % WIDTH == 0)
+                fprintf(data, "\n");
+        }
     }
     fclose(data);
 }

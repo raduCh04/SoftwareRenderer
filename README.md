@@ -19,13 +19,17 @@ The primary objectives of this project are to:
 
 - [Line drawing](docs/line-drawing.md) 
    - [x] Mathematical Equation
+   - [x] Incremental Line Algorithm
    - [x] DDA Algorithm
+   - [x] Midpoint Line Algorithm
    - [x] Bresenham Algorithm
    - [ ] Different Thickness
    - [ ] Antialiasing (Xiaolin Wu)
-- [Circle drawing](docs/circle-drawing.md)
+- [Circle drawing & filling](docs/circle-drawing.md)
    - [x] Mathematical Equations
+   - [ ] Midpoint Circle Algorithm
    - [x] Bresenham Approach
+   - [ ] Circle Filling
 - [Polygon drawing & filling](docs/polygon-drawing-filling.md)
    - [ ] Connecting Vertices
    - [ ] Scan Line
@@ -43,7 +47,7 @@ More coming soon
 ### ✅ Prerequisites
 - A C compiler (e.g., `gcc` , `clang`, `MSVC`)
 - CMake
-- GIMP, ImageMagick, or any image viewer that supports loading raw `.data`
+- GIMP, ImageMagick, or any image viewer that supports loading`.ppm`
 
 ### Build & Run
 ```bash
@@ -58,13 +62,8 @@ This will generate a file called pixmap.data in the current directory.
 ### 🖼️ Viewing the output (e.g. GIMP)
 1. Open Gimp.
 2. Go to File > Open.
-3. Choose pixmap.data.
-4. In the Raw Image Data import dialog:  
-   - Image Type: RGBA
-   - Width: width of the pixmap itself (e.g. 800)
-   - Height: height of the pixmap itself (e.g. 600)
-   - Offset: 0
-5. Click import to view the image.
+3. Choose pixmap.oom.
+4. Open file.
 
 
 ## License

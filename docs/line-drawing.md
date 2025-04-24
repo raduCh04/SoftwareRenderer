@@ -56,8 +56,10 @@ $$
 - Rounding operations may introduce gaps or jagged edges in the rendered line.
 
 - While not suitable for performance-critical applications, it is simple to implement and useful for educational purposes or prototyping.
+### 2. Incremental Line Drawing Algorithm
+Comming Soon
 
-### 2. DDA Line Drawing Algorithm
+### 3. DDA Line Drawing Algorithm
 
 The **Digital Differential Analyzer** is a line drawing algorithm based on the incremental difference between the x and y coordinates in the two endpoints.
 
@@ -80,5 +82,7 @@ $$
 
 - The algorithm produces smoother and more uniform lines than the naive approach, particularly on low-resolution displays or long segments.
 
-### 3. Bresenham Line Drawing Algorithm
+### 4. Midpoint Line Drawing Algorithm
+Comming Soon
+### 5. Bresenham Line Drawing Algorithm
 Comming Soon
