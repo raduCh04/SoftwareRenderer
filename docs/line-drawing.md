@@ -56,8 +56,16 @@ $$
 - Rounding operations may introduce gaps or jagged edges in the rendered line.
 
 - While not suitable for performance-critical applications, it is simple to implement and useful for educational purposes or prototyping.
+
 ### 2. Incremental Line Drawing Algorithm
-Comming Soon
+This Algorithm is mostly the same as the first **Naive Line Drawing Algorithm** with only one exeption, the $y$ calculation. In the previous algorithm the $y$ was calculated using the mathematical formula $y = mx + b$. To try and optimize it, we can try and evaluate how y changes with each next x:
+$$
+F(x, y) = mx - y + b, F(x + 1, y) = m(x + 1) - y + b \\
+$$
+$$
+F(x + 1, y) - F(x, y) = m
+$$
+This tells us that y increases always by the same value m. This is quite a minor improvement over the first algorithm, however it shows us a way to check for same changes in an equation, which will be useful for the Bresenham Algorithm.
 
 ### 3. DDA Line Drawing Algorithm
 
@@ -83,6 +91,29 @@ $$
 - The algorithm produces smoother and more uniform lines than the naive approach, particularly on low-resolution displays or long segments.
 
 ### 4. Midpoint Line Drawing Algorithm
-Comming Soon
+This algorithm is based on the fact that the actual y coordinate is most of the time always between two pixel, $y_k$ or $y_k+1$. This allows us to draw the line more accurately since we do not round all the values. This means we can choose whever to increase $y$ or not, by calculating the distances from the actual y-value to y_k and y_k+1:
+
+
+#### Steps:
+1. Calculate the slope and the y intercept
+2. For each integer value of $x$ between $x_0$ and $x_1$, calculate the corresponding $y$-value using the equation:
+
+$$
+y = mx + b
+$$
+3. if $y > 0.5$ then increment $y_k$
+3. Draw the point $(x, y_k)$ for each calculated $x$-value.
 ### 5. Bresenham Line Drawing Algorithm
-Comming Soon
+This algorithm is the most efficient algorithm for drawing lines, because it uses only integer values and additions. It is based on the Midpoint Line Drawing Algorithm, with the idea of the $y$-value being between two pixels. To increment or not to icrement, that's the question. We will use the so called decision parameter.
+
+#### Steps:
+1. First of all we need to calculate the first decision D, as a starting point.
+$$
+F(x_0 + 1, y + \frac{1}{2})  = m(x_0+1) - (y + \frac{1}{2}) + b \\\iff mx_0 + m - y - \frac{1}{2} + b \\ \iff (mx_0 - y + b) + (m - \frac{1}{2}) \\ = F(x_0, y_0) + (m - \frac{1}{2})
+$$
+$$
+m - \frac{1}{2} \iff \frac{\delta y}{\delta x} - \frac{1}{2}  \iff \delta y - \frac{1}{2} * \delta x \iff 2 * \delta y -\delta x \\
+$$
+$$
+D := 2 * \delta x - \delta y
+$$

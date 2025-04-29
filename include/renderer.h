@@ -27,7 +27,7 @@ typedef enum Color
     WHITE = 0xFFFFFFFF,
     RED = 0xFF0000FF,
     GREEN = 0x00FF00FF,
-    BLUE =  0x0000,
+    BLUE =  0x0000FFFF,
 } Color;
 
 /**
