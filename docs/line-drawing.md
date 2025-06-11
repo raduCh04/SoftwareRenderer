@@ -59,12 +59,15 @@ $$
 
 ### 2. Incremental Line Drawing Algorithm
 This Algorithm is mostly the same as the first **Naive Line Drawing Algorithm** with only one exeption, the $y$ calculation. In the previous algorithm the $y$ was calculated using the mathematical formula $y = mx + b$. To try and optimize it, we can try and evaluate how y changes with each next x:
+
 $$
 F(x, y) = mx - y + b, F(x + 1, y) = m(x + 1) - y + b \\
 $$
+
 $$
 F(x + 1, y) - F(x, y) = m
 $$
+
 This tells us that y increases always by the same value m. This is quite a minor improvement over the first algorithm, however it shows us a way to check for same changes in an equation, which will be useful for the Bresenham Algorithm.
 
 ### 3. DDA Line Drawing Algorithm
@@ -75,9 +78,11 @@ The **Digital Differential Analyzer** is a line drawing algorithm based on the i
 1. Calculate the differenece $(dx, dy)$ between the $x$ and $y$ coordinates of the endpoints.
 2. Choose the number of $steps$ needed to plot the line by choosing the greater difference $max(|dx|, |dy|)$.
 3. Calculate the steps for incrementing the x and y coordinates.
+
 $$
 x_{\text{step}}= \frac{dx}{steps} \quad y_{\text{step}} = \frac{dy}{steps}
 $$
+
 4. Starting from the initial point $(x_0,y_0)$, add $x_{\text{step}}$​ and $y_{\text{step}}$ at each iteration and plot the point until the final point $(x_1,y_1)$ is reached.
 
 #### Performance Considerations
@@ -101,19 +106,24 @@ This algorithm is based on the fact that the actual y coordinate is most of the 
 $$
 y = mx + b
 $$
+
 3. if $y > 0.5$ then increment $y_k$
-3. Draw the point $(x, y_k)$ for each calculated $x$-value.
+4. Draw the point $(x, y_k)$ for each calculated $x$-value.
+
 ### 5. Bresenham Line Drawing Algorithm
 This algorithm is the most efficient algorithm for drawing lines, because it uses only integer values and additions. It is based on the Midpoint Line Drawing Algorithm, with the idea of the $y$-value being between two pixels. To increment or not to icrement, that's the question. We will use the so called decision parameter.
 
 #### Steps:
 1. First of all we need to calculate the first decision D, as a starting point.
+
 $$
 F(x_0 + 1, y + \frac{1}{2})  = m(x_0+1) - (y + \frac{1}{2}) + b \\\iff mx_0 + m - y - \frac{1}{2} + b \\ \iff (mx_0 - y + b) + (m - \frac{1}{2}) \\ = F(x_0, y_0) + (m - \frac{1}{2})
 $$
+
 $$
 m - \frac{1}{2} \iff \frac{\delta y}{\delta x} - \frac{1}{2}  \iff \delta y - \frac{1}{2} * \delta x \iff 2 * \delta y -\delta x \\
 $$
+
 $$
 D := 2 * \delta x - \delta y
 $$
