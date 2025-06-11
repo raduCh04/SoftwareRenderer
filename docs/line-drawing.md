@@ -117,3 +117,5 @@ $$
 $$
 D := 2 * \delta x - \delta y
 $$
+
+To be continued...
