@@ -27,9 +27,9 @@ The primary objectives of this project are to:
    - [ ] Antialiasing (Xiaolin Wu)
 - [Circle drawing & filling](docs/circle-drawing.md)
    - [x] Mathematical Equations
-   - [ ] Midpoint Circle Algorithm
+   - [x] Midpoint Circle Algorithm
    - [x] Bresenham Approach
-   - [ ] Circle Filling
+   - [x] Circle Filling
 - [Polygon drawing & filling](docs/polygon-drawing-filling.md)
    - [ ] Connecting Vertices
    - [ ] Scan Line

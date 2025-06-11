@@ -64,6 +64,7 @@ void pixmap_export(void)
     fclose(data);
 }
 
+#pragma region Point
 void draw_point(int32_t x, int32_t y, uint32_t color)
 {
     if (x >= WIDTH || y >= HEIGHT || y < 0 || x < 0) // TODO: Negative coordinates?
@@ -80,7 +81,9 @@ void draw_point_thick(int32_t x, int32_t y, int32_t thickness, uint32_t color)
             draw_point(x + dx, y + dy, color);
         }
 }
+#pragma endregion Point
 
+#pragma region Line
 /**
  * @brief Draws a vertical line at a specified x-coordinate between two y-coordinates
  *
@@ -317,6 +320,9 @@ void draw_line(int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t thickness
     assert(false);
     // TODO: Implement
 }
+#pragma endregion Line
+
+#pragma region Circle
 
 static void draw_circle_symmetric(int32_t cx, int32_t cy, int32_t x, int32_t y, uint32_t color)
 {
@@ -365,8 +371,24 @@ void draw_circle_equation3(int32_t cx, int32_t cy, int32_t r, uint32_t color)
 
 void draw_circle_midpoint(int32_t cx, int32_t cy, int32_t r, uint32_t color)
 {
-    // TODO: Implement
-    assert(false);
+    int32_t x = 0;
+    int32_t y = -r;
+    int32_t D = -r;
+
+    while (x < -y)
+    {
+        if (D > 0)
+        {
+            y++;
+            D += 2 * (x + y) + 1;
+        }
+        else
+        {
+            D += 2 * x + 1;
+        }
+        draw_circle_symmetric(cx, cy, x, y, color);
+        x++;
+    }
 }
 
 void draw_circle_bresenham(int32_t cx, int32_t cy, int32_t r, uint32_t color)
@@ -397,12 +419,35 @@ void draw_circle_bresenham(int32_t cx, int32_t cy, int32_t r, uint32_t color)
 
 void draw_circle(int32_t cx, int32_t cy, int32_t r, uint32_t color)
 {
-    // TODO: Implement
-    assert(false);
+    draw_circle_bresenham(cx, cy, r, color);
 }
 
 void fill_circle(int32_t cx, int32_t cy, int32_t r, uint32_t color)
 {
-    // TODO: Implement
-    assert(false);
+    int32_t x = 0;
+    int32_t y = -r;
+    int32_t D = -r;
+
+    while (x <= -y)
+    {
+        //TODO: Change to draw line function
+        draw_line_bresenham(cx + x, cy + y, cx + x, cy - y, color);
+        draw_line_bresenham(cx - x, cy + y, cx - x, cy - y, color);
+        draw_line_bresenham(cx + y, cy + x, cx + y, cy - x, color);
+        draw_line_bresenham(cx - y, cy + x, cx - y, cy - x, color);
+
+        if (D > 0)
+        {
+            y++;
+            D += 2 * (x + y) + 1;
+        }
+        else
+        {
+            D += 2 * x + 1;
+        }
+        draw_circle_symmetric(cx, cy, x, y, color);
+        x++;
+    }
 }
+
+#pragma endregion Circle
